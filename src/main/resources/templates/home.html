@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TimeStamp service</title>
+</head>
+<body>
+<h1>TimeStamp service</h1>
+Type in an input date to convert, or just click the convert button to get the current date and time!<br/><br/>
+Valid input date formats:<br/>
+<ul>
+<li>Unix timestamp. E.g.: 1647948896000</li>
+<li>Date with time. E.g.: 1985-11-08 12:34:56</li>
+</ul>
+<br/>
+<p id="error" style="color: red;"></p>
+Input date<br/>
+<input id="input" type="text" size="50"><br/>
+<input id="convertBtn" type="button" value="Convert!"><br/>
+Unix timestamp:<br/>
+<input id="unix" type="text" size="50" disabled><br/>
+Date:<br/>
+<input id="date" type="text" size="50" disabled><br/>
+<script>
+let input = document.getElementById('input');
+
+function handleResponse( response ){
+	let unix = document.getElementById( 'unix' );
+	let date = document.getElementById( 'date' );
+	unix.value = response.unix;
+	date.value = response.dateString;
+}
+
+function handleError(){
+	let p = document.getElementById('error');
+	p.innerHTML = 'Error while trying to convert "' + input.value + '"';
+}
+
+function convertDate( inputDate ){
+	const xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function(){
+		if( this.readyState == 4 ){
+			if( this.status == 200 ){
+				let response = JSON.parse( this.responseText );
+				handleResponse( response );
+			}
+			else
+			{
+				handleError();
+			}
+		} 
+	}
+	xhttp.open( "GET", "/date/" + inputDate );
+	xhttp.send();
+}
+
+function getCurrentDate(){
+	convertDate( '' );
+}
+
+let button = document.getElementById('convertBtn');
+button.onclick = function(){
+	let p = document.getElementById('error');
+	p.innerHTML = '';
+	
+	if( input.value == '' )
+	{
+		getCurrentDate();
+		return;
+	}
+	
+	convertDate( input.value );
+}
+</script>
+</body>
+</html>
